@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Офисный веб-органайзер</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+        .success-message {
+            color: #198754;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container" id="loginForm">
+            <h2 class="text-center mb-4">Вход в систему</h2>
+            <form id="login">
+                <div class="mb-3">
+                    <label for="loginUsername" class="form-label">Логин</label>
+                    <input type="text" class="form-control" id="loginUsername" required>
+                </div>
+                <div class="mb-3">
+                    <label for="loginPassword" class="form-label">Пароль</label>
+                    <input type="password" class="form-control" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+                <div class="text-center mt-3">
+                    <a href="#" id="showRegister">Зарегистрироваться</a>
+                </div>
+                <div class="error-message" id="loginError"></div>
+            </form>
+        </div>
+
+        <div class="auth-container" id="registerForm" style="display: none;">
+            <h2 class="text-center mb-4">Регистрация</h2>
+            <form id="register">
+                <div class="mb-3">
+                    <label for="registerUsername" class="form-label">Логин (латинские буквы)</label>
+                    <input type="text" class="form-control" id="registerUsername" required pattern="[a-zA-Z]+">
+                </div>
+                <div class="mb-3">
+                    <label for="registerFullName" class="form-label">ФИО (русские буквы)</label>
+                    <input type="text" class="form-control" id="registerFullName" required pattern="[а-яА-ЯёЁ\s]+">
+                </div>
+                <div class="mb-3">
+                    <label for="registerPassword" class="form-label">Пароль</label>
+                    <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                </div>
+                <div class="mb-3">
+                    <label for="registerPasswordConfirm" class="form-label">Подтверждение пароля</label>
+                    <input type="password" class="form-control" id="registerPasswordConfirm" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                <div class="text-center mt-3">
+                    <a href="#" id="showLogin">Войти</a>
+                </div>
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        });
+
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        });
+
+        document.getElementById('login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const loginError = document.getElementById('loginError');
+            loginError.style.display = 'none';
+
+            try {
+                const response = await fetch('/login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        login: document.getElementById('loginUsername').value,
+                        password: document.getElementById('loginPassword').value
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/dashboard.php';
+                } else {
+                    loginError.textContent = data.message;
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                loginError.textContent = 'Произошла ошибка при входе';
+                loginError.style.display = 'block';
+            }
+        });
+
+        document.getElementById('register').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const registerError = document.getElementById('registerError');
+            const registerSuccess = document.getElementById('registerSuccess');
+            registerError.style.display = 'none';
+            registerSuccess.style.display = 'none';
+
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                registerError.textContent = 'Пароли не совпадают';
+                registerError.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        login: document.getElementById('registerUsername').value,
+                        full_name: document.getElementById('registerFullName').value,
+                        password: password,
+                        password_confirm: passwordConfirm
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    registerSuccess.textContent = data.message;
+                    registerSuccess.style.display = 'block';
+                    document.getElementById('register').reset();
+                    setTimeout(() => {
+                        document.getElementById('showLogin').click();
+                    }, 2000);
+                } else {
+                    registerError.textContent = data.message;
+                    registerError.style.display = 'block';
+                }
+            } catch (error) {
+                registerError.textContent = 'Произошла ошибка при регистрации';
+                registerError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,32 @@
+# Конфигурационные файлы
+config.php
+.env
+.env.local
+.env.*.local
+
+# Загруженные файлы
+uploads/
+assets/uploads/
+
+# Временные файлы
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Зависимости
+/vendor/
+/node_modules/
+
+# Кэш
+*.cache
+
+# Дополнительные исключения
+/modules/info/uploads/ 

@@ -1,0 +1,35 @@
+RewriteEngine On
+RewriteBase /
+
+# Если файл или директория не существуют физически
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Маршрутизация для модулей
+RewriteRule ^auth/?$ modules/auth/index.php [L]
+RewriteRule ^auth/handler$ modules/auth/auth_handler.php [L]
+RewriteRule ^organizer/?$ modules/organizer/index.php [L]
+RewriteRule ^organizer/tasks/?$ modules/tasks/index.php [L]
+RewriteRule ^organizer/info/?$ modules/info/index.php [L]
+RewriteRule ^organizer/admin/?$ modules/admin/index.php [L]
+
+# Перенаправление на главную страницу
+RewriteRule ^$ modules/organizer/index.php [L]
+
+# Разрешаем доступ к статическим файлам
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Защита файлов
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# PHP настройки
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300 
